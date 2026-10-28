@@ -1,0 +1,26 @@
+name: Build open source Windows ARM64
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-11-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          architecture: arm64
+      - name: Install JS dependencies without bundled native install scripts
+        run: npm install --ignore-scripts --package-lock=false
+      - name: Compile native ARM64 input module and package Electron
+        run: npm run build:win:arm64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BilldDesk-OpenSource-Windows-ARM64-experimental
+          path: electron-release/arm64/*.exe
+          if-no-files-found: error

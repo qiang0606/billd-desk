@@ -18,6 +18,7 @@
     "build:mw": "standard-version && vite build && electron-builder --mac --win",
     "build:prod": "cross-env VITE_APP_RELEASE_PROJECT_ISWEB=true vite build",
     "build:win": "standard-version && vite build && electron-builder --win",
+    "build:win:arm64": "node scripts/build-windows-arm64.cjs",
     "copy": "ts-node ./deploy/handleGiteeJenkins.mjs",
     "cz": "cz",
     "deploy:beta": "node ./deploy/index.cjs --beta",

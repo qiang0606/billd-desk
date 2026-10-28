@@ -7,3 +7,4 @@ auto-imports.d.ts
 deploy
 electron-release
 electron-dist
+.arm64-native/
