@@ -1,0 +1,38 @@
+name: Publish verified ARM64 diagnostic build
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check build provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/runs/40654631215 > run.json
+          jq -e '.conclusion == "success" and .head_sha == "b28a76962652f7eb776381e1158f44864e56a595"' run.json
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40654631215
+          name: BilldDesk-OpenSource-Windows-ARM64-experimental
+          path: package
+      - name: Publish prerelease with explicit validation limits
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum package/*.exe > package/SHA256SUMS.txt
+          cat > notes.md <<'EOF'
+          ARM64 startup diagnostic build, not yet verified for end-to-end remote control.
+
+          Changes: asInvoker executable manifest, production developer tools disabled,
+          packaged GUI smoke test with sandbox enabled. Native ARM64 input module
+          and actual packaged window passed checks on Windows 11 ARM64 CI.
+
+          Windows 10 ARM64 runtime testing and compatible signaling service setup
+          remain required. No no-sandbox flag is enabled by default.
+          EOF
+          gh release create v0.0.2-arm64.1 --repo '${{ github.repository }}' --target b28a769 --prerelease --title 'Windows ARM64 0.0.2 — startup diagnostic' --notes-file notes.md package/*.exe package/SHA256SUMS.txt

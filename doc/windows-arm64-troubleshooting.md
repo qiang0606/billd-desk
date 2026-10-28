@@ -38,6 +38,30 @@ Successful window rendering therefore does not establish remote-control support.
 
 ## Remaining acceptance checks
 
+## Existing x86 client service settings
+
+Read from the working v0.621.0 desktop client's Custom Settings page on
+2026-10-28, without changing its configuration:
+
+- API: `https://desk-api.hsslive.cn` (custom override disabled).
+- WSS: `wss://desk-api.hsslive.cn` (custom override disabled).
+- Two default relay locations selected: Chengdu and Shanghai.
+
+These are vendor-hosted services, not a signaling server installed on the x86 PC.
+The publicly served vendor web client uses Socket.IO path `/rtc`, no trailing
+slash, a custom binary parser, device authentication query fields, and a newer
+registration API `/desk_user/auto_register`. The old open-source client instead
+uses `/socket.io/`, the default parser and `/desk_user/create`. Copying just the
+hostname therefore does not establish compatibility. A 404 at `/socket.io/`
+does not establish that the vendor's current `/rtc` service is unavailable.
+
+Build 40654631215 at commit b28a769 passed native loading and packaged GUI smoke
+tests on Windows 11 ARM64 with sandbox enabled. This remains separate from
+Windows 10 ARM64 validation. No private relay credentials or device identifiers
+are recorded here.
+
+## Pending end-to-end validation
+
 - Normal launch on Windows 10 ARM64 with no sandbox-disabling flags.
 - Working, compatible API and signaling service; device registration succeeds.
 - A second device receives the ARM64 screen and can move/click/type on it.
