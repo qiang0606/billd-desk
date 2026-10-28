@@ -13,8 +13,11 @@ jobs:
         with:
           node-version: '22'
           architecture: arm64
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '9'
       - name: Install JS dependencies without bundled native install scripts
-        run: npm install --ignore-scripts --package-lock=false
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Compile native ARM64 input module and package Electron
         run: npm run build:win:arm64
         env:
