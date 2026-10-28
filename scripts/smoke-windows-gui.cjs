@@ -66,9 +66,13 @@ async function main() {
     let state;
     for (let i = 0; i < 40; i++) {
       const result = await call('Runtime.evaluate', {
-        expression: 'JSON.stringify({text:document.body.innerText,preload:!!window.electronAPI?.ipcRenderer,inputs:document.querySelectorAll("input").length})',
+        expression: 'JSON.stringify({text:document.body?.innerText || "",preload:!!window.electronAPI?.ipcRenderer,inputs:document.querySelectorAll("input").length})',
         returnByValue: true,
       });
+      if (typeof result.result?.value !== 'string') {
+        await new Promise(resolve => setTimeout(resolve, 250));
+        continue;
+      }
       state = JSON.parse(result.result.value);
       if (state.text.includes('远程控制设备') && state.preload && state.inputs > 0) break;
       await new Promise(resolve => setTimeout(resolve, 250));

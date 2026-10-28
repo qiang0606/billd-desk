@@ -100,3 +100,19 @@ Windows-profile login returned 200; its authenticated MessagePack `/rtc` join
 received `joinResult`. TypeScript/Vite production build passed. Mock native-input
 tests cover normalized/relative coordinates, releasing held keys/buttons on
 disconnect, and rejecting malformed input and non-input operations.
+
+### Bidirectional input channel and GUI-check timing
+
+Review of the public controller protocol found that the controlled host creates
+one reliable, ordered data channel; the controller replies on that same channel.
+The legacy open-source receive handler waited for a second controller-created
+channel. The official adapter now publishes the host-created channel to the
+receive handler and sends the `dataChannelOk` handshake when it opens. Regression
+tests exercise the real WebRTC class for official and legacy channel behavior.
+All five channel/input tests and the local production build pass.
+
+The first 0.0.3 CI attempt packaged the ARM64 executable and loaded its native
+input module, but failed its GUI smoke test: the checker evaluated the document
+before `body` existed. The checker now tolerates that loading state and continues
+waiting for the actual UI, rather than treating it as a JSON parsing failure.
+No end-to-end remote-control success is claimed by these checks.

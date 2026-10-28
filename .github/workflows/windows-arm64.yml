@@ -28,7 +28,7 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - name: Verify desktop input validation and key release
-        run: node --test tests/official-input.test.cjs
+        run: node --test tests/official-input.test.cjs tests/official-channel.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
