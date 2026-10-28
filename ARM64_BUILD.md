@@ -1,10 +1,14 @@
 # BilldDesk 开源版 Windows ARM64 实验构建
 
 基于 galaxy-s10/billd-desk 的 61be620eb35b0004dc66c296f0fdd8c62700b1b9。
-这是开源版的移植准备，不是 BilldDesk Pro v0.621.0。
+这是开源版的移植，不是 BilldDesk Pro v0.621.0。
 
-当前状态：已创建独立 fork 并开始 Windows ARM64 云端构建。
-构建记录：https://github.com/qiang0606/billd-desk/actions
+当前状态：Windows ARM64 云端构建成功，已生成 ARM64 NSIS 安装器。
+构建源码提交：38d2500。
+构建记录：https://github.com/qiang0606/billd-desk/actions/runs/40642745935
+已通过主程序和包内 libnut.node 的 ARM64 PE 架构检查、Node 原生模块加载、
+Electron 33.2.1 内的包内原生模块加载及 nut-js 键鼠 API 导出检查。
+界面与主进程构建通过；桌面页面使用相对资源路径，并检查不存在根路径资源。
 目标 Win10 ARM64 机器的被控功能尚未验证。
 
 构建入口：GitHub Actions 的 Build open source Windows ARM64，手动运行。
@@ -21,6 +25,8 @@
 移植使用 libnut-core 提交 dd54b1b700b5749b03604b6635c0ccd59b215b9d。
 它的版本是 2.7.5，替代项目依赖包中 2.7.3 的 x64 二进制，API 兼容性仍需验证。
 构建移除上游捆绑 x64 CRT DLL 的复制步骤，改用静态 ARM64 CRT。
+原生构建工具更新到 cmake-js 7.4.0，避免旧工具误链接 x86 node.lib。
+打包配置独立于上游，确保安装包仅包含 ARM64 主程序。
 独立 appId 和产品名用于区分现有 Pro 安装。
 
 即使云端编译成功，也不表示 Win10 ARM 被控功能已验证。必须在目标机检查：
