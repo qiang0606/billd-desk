@@ -65,7 +65,28 @@ fs.mkdirSync(release, { recursive: true });
 fs.copyFileSync(binary, path.join(release, 'libnut.node'));
 // A native load test must pass before generating the installer.
 require(path.join(release, 'libnut.node'));
+console.log('ARM64 native module load passed.');
 run(process.execPath, [path.join(path.dirname(require.resolve('vite/package.json')), 'bin/vite.js'), 'build']);
 run(process.execPath, [path.join(path.dirname(require.resolve('electron-builder/package.json')), 'cli.js'),
   '--win', '--arm64', '--config', 'electron-builder.arm64.json5', '--publish', 'never']);
-assertArm64(path.join(root, 'electron-release/arm64/win-arm64-unpacked/BilldDesk OpenSource ARM64.exe'));
+const app = path.join(root, 'electron-release/arm64/win-arm64-unpacked/BilldDesk OpenSource ARM64.exe');
+assertArm64(app);
+const packagedNative = path.join(path.dirname(app),
+  'resources/app.asar.unpacked/node_modules/@nut-tree-fork/libnut-win32/build/Release/libnut.node');
+assertArm64(packagedNative);
+if (fs.existsSync(path.join(root, 'electron-release/arm64/win-unpacked'))) {
+  throw new Error('Unexpected non-ARM64 application payload.');
+}
+const smoke = path.join(root, '.arm64-native/electron-smoke.cjs');
+fs.writeFileSync(smoke, `
+  if (process.arch !== 'arm64' || !process.versions.electron) throw new Error('Expected ARM64 Electron');
+  require(${JSON.stringify(packagedNative)});
+  const nut = require(${JSON.stringify(require.resolve('@nut-tree-fork/nut-js'))});
+  if (!nut.mouse || !nut.keyboard) throw new Error('Input API unavailable');
+  console.log('ARM64 Electron input module load passed:', process.versions.electron);
+`);
+execFileSync(app, [smoke], {
+  cwd: root, stdio: 'inherit', timeout: 60000,
+  env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+});
+console.log('Verified ARM64 application and Electron input API.');

@@ -1,17 +1,26 @@
 {
-  extends: './electron-builder.json5',
+  // Keep this independent: inherited target arrays would also bundle x64.
   appId: 'com.billddesk.opensource.arm64',
   productName: 'BilldDesk OpenSource ARM64',
   npmRebuild: false,
   directories: { output: 'electron-release/arm64' },
   files: [
-    'dist', 'electron-dist',
+    'dist', 'electron-dist', 'LICENSE.txt',
     '!node_modules/@nut-tree/**',
     '!node_modules/@nut-tree-fork/libnut-darwin/**',
     '!node_modules/@nut-tree-fork/libnut-linux/**',
   ],
   win: {
+    icon: 'build/icons/icon.ico',
+    requestedExecutionLevel: 'requireAdministrator',
     target: [{ target: 'nsis', arch: ['arm64'] }],
     artifactName: 'BilldDesk-OpenSource-${version}-windows-arm64.${ext}',
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    removeDefaultUninstallWelcomePage: false,
+    deleteAppDataOnUninstall: false,
   },
 }
