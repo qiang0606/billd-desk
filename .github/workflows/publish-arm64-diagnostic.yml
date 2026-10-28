@@ -35,4 +35,4 @@ jobs:
           Windows 10 ARM64 runtime testing and compatible signaling service setup
           remain required. No no-sandbox flag is enabled by default.
           EOF
-          gh release create v0.0.2-arm64.1 --repo '${{ github.repository }}' --target b28a769 --prerelease --title 'Windows ARM64 0.0.2 — startup diagnostic' --notes-file notes.md package/*.exe package/SHA256SUMS.txt
+          gh release create v0.0.2-arm64.1 --repo '${{ github.repository }}' --target b28a76962652f7eb776381e1158f44864e56a595 --prerelease --title 'Windows ARM64 0.0.2 — startup diagnostic' --notes-file notes.md package/*.exe package/SHA256SUMS.txt
