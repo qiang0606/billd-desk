@@ -44,8 +44,12 @@ const patched = cmake.replace(
 );
 if (patched === cmake) throw new Error('Upstream CMake layout changed.');
 fs.writeFileSync(cmakeFile, patched);
+const cmakeHelp = execFileSync('cmake', ['--help'], { encoding: 'utf8' });
+const generators = [...cmakeHelp.matchAll(/^\s*\*?\s*(Visual Studio (\d+) \d{4})/gm)]
+  .sort((a, b) => Number(b[2]) - Number(a[2]));
+if (!generators.length) throw new Error('No Visual Studio CMake generator is installed.');
 run(process.execPath, [path.join(native, 'node_modules/cmake-js/bin/cmake-js'),
-  'rebuild', '--arch=arm64', '--platform=win32',
+  'rebuild', '--arch=arm64', '--platform=ARM64', '--generator', generators[0][1],
   '--CDCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded'], native);
 const binary = path.join(native, 'build/Release/libnut.node');
 assertArm64(binary);
