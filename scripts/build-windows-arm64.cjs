@@ -95,3 +95,4 @@ execFileSync(app, [smoke], {
   env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
 });
 console.log('Verified ARM64 application and Electron input API.');
+run(process.execPath, [path.join(root, 'scripts/smoke-windows-gui.cjs')]);

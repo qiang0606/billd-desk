@@ -12,7 +12,7 @@
   ],
   win: {
     icon: 'build/icons/icon.ico',
-    requestedExecutionLevel: 'requireAdministrator',
+    requestedExecutionLevel: 'asInvoker',
     target: [{ target: 'nsis', arch: ['arm64'] }],
     artifactName: 'BilldDesk-OpenSource-${version}-windows-arm64.${ext}',
   },

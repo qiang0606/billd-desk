@@ -21,7 +21,7 @@ import {
   fetchDeskVersionCheck,
   fetchDeskVersionLatest,
 } from '@/api/deskVersion';
-import { APP_BUILD_INFO, WINDOW_ID_ENUM } from '@/constant';
+import { APP_BUILD_INFO, NODE_ENV, WINDOW_ID_ENUM } from '@/constant';
 import { useIpcRendererSend } from '@/hooks/use-ipcRendererSend';
 import { useAppStore } from '@/store/app';
 import { usePiniaCacheStore } from '@/store/cache';
@@ -48,7 +48,9 @@ onMounted(() => {
   });
   getClient();
   if (ipcRenderer) {
-    handleOpenDevTools({ windowId: WINDOW_ID_ENUM.remote });
+    if (NODE_ENV === 'development') {
+      handleOpenDevTools({ windowId: WINDOW_ID_ENUM.remote });
+    }
     handleDeskVersionCheck();
   }
 });
