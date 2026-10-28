@@ -33,6 +33,11 @@ const native = path.join(root, '.arm64-native');
 if (fs.existsSync(native)) throw new Error('Remove .arm64-native before rebuilding.');
 run('git', ['clone', 'https://github.com/ZachJW34/libnut-core.git', native]);
 run('git', ['checkout', '--detach', 'dd54b1b700b5749b03604b6635c0ccd59b215b9d'], native);
+// 7.3.0 incorrectly selects win-x86/node.lib for ARM64 (fixed in 7.3.1).
+const nativePackageFile = path.join(native, 'package.json');
+const nativePackage = JSON.parse(fs.readFileSync(nativePackageFile, 'utf8'));
+nativePackage.devDependencies['cmake-js'] = '7.4.0';
+fs.writeFileSync(nativePackageFile, JSON.stringify(nativePackage, null, 2));
 run(process.execPath, [npm, 'install', '--ignore-scripts', '--package-lock=false',
   '--registry=https://registry.npmjs.org'], native);
 const cmakeFile = path.join(native, 'CMakeLists.txt');
