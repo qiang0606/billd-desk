@@ -33,7 +33,8 @@ const native = path.join(root, '.arm64-native');
 if (fs.existsSync(native)) throw new Error('Remove .arm64-native before rebuilding.');
 run('git', ['clone', 'https://github.com/ZachJW34/libnut-core.git', native]);
 run('git', ['checkout', '--detach', 'dd54b1b700b5749b03604b6635c0ccd59b215b9d'], native);
-run(process.execPath, [npm, 'install', '--ignore-scripts', '--package-lock=false'], native);
+run(process.execPath, [npm, 'install', '--ignore-scripts', '--package-lock=false',
+  '--registry=https://registry.npmjs.org'], native);
 const cmakeFile = path.join(native, 'CMakeLists.txt');
 const cmake = fs.readFileSync(cmakeFile, 'utf8');
 // Upstream copies bundled x64 CRT DLLs. Use the static ARM64 CRT instead.

@@ -17,7 +17,7 @@ jobs:
         with:
           version: '9'
       - name: Install JS dependencies without bundled native install scripts
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts --registry=https://registry.npmjs.org
       - name: Compile native ARM64 input module and package Electron
         run: npm run build:win:arm64
         env:
