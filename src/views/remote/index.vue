@@ -107,7 +107,14 @@
       </div>
 
       <template v-if="!appStore.remoteDesk.size">
-        <div class="tip">已准备好连接</div>
+        <div class="tip">
+          {{
+            connectStatus === WsConnectStatusEnum.connect &&
+            cacheStore.deskUserUuid
+              ? '已连接服务，可以被控'
+              : '尚未连接服务'
+          }}
+        </div>
         <div class="link-config">
           <div class="link-item">
             <n-space>
@@ -382,6 +389,8 @@ watch(
           data: any;
         } = JSON.parse(event.data);
         const { msgType } = jsondata;
+        const official = networkStore.wsMap.get(roomId.value)?.official;
+        if (official?.handleData(item, jsondata, anchorStream.value)) return;
         if (msgType === WsMsgTypeEnum.changeMaxBitrate) {
           const { data }: { data: WsChangeMaxBitrateType['data'] } = jsondata;
           currentMaxBitrate.value = data.val;
@@ -632,6 +641,10 @@ async function initDeskUser() {
 }
 
 async function handleUpdatePassword() {
+  if (networkStore.wsMap.get(roomId.value)?.official) {
+    window.$message.info('官方兼容模式暂不支持修改连接密码。');
+    return;
+  }
   try {
     cacheStore.deskUserPassword = getRandomString(8);
     // if (cacheStore.deskUserPassword === originalPassword.value) return;
@@ -750,6 +763,7 @@ async function handleRTC(receiver) {
       deskUserUuid: cacheStore.deskUserUuid,
       remoteDeskUserUuid: cacheStore.remoteDeskUserUuid,
     });
+    rtc.value.localStream = anchorStream.value;
     webRtcRemoteDesk.sendOffer({
       sender: mySocketId.value,
       receiver,
@@ -906,6 +920,12 @@ function handleDelLinkDeviceList(item) {
 }
 
 async function startRemote() {
+  if (networkStore.wsMap.get(roomId.value)?.official) {
+    window.$message.info(
+      '当前官方兼容模式用于被控，请在原版 BilldDesk 上输入此设备代码连接。'
+    );
+    return;
+  }
   if (cacheStore.remoteDeskUserUuid === '') {
     window.$message.warning('请输入远程设备代码！');
     return;

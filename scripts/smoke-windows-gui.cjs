@@ -18,6 +18,7 @@ async function main() {
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.__COMPAT_LAYER;
   const child = spawn(app, [
+    '--host-resolver-rules=MAP desk-api.hsslive.cn ~NOTFOUND',
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${path.join(output, 'profile')}`,
     '--enable-logging=file', `--log-file=${path.join(output, 'chromium.log')}`,

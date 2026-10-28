@@ -36,8 +36,6 @@ Successful window rendering therefore does not establish remote-control support.
   screenshot and logs. This checks Windows 11 ARM64; the user's Windows 10
   machine remains a separate required validation target.
 
-## Remaining acceptance checks
-
 ## Existing x86 client service settings
 
 Read from the working v0.621.0 desktop client's Custom Settings page on
@@ -70,3 +68,35 @@ are recorded here.
 Do not label a build fully working until all checks above have actually passed.
 Never commit device passwords, signaling credentials, session URLs, user logs,
 or unredacted remote-desktop screenshots to this public repository.
+
+## Subsequent real-machine result
+
+The 0.0.2 installer (SHA256
+`88a87e670c87f9c36b7b05187c5de82d59f272f0682ff90bb9a3a5475825581e`)
+was downloaded on the affected Windows 10 ARM64 machine, checksum-verified,
+and installed over the existing installation. The installer's normal launch
+displayed the full main window. No sandbox-disabling arguments were supplied.
+The device code/password were still empty, so remote control was not yet working.
+
+Independent temporary test-device requests to the current official service
+succeeded for automatic registration and an authenticated MessagePack Socket.IO
+connection on `/rtc`, including a `joinResult` reply. No existing user device
+password was used in those protocol probes.
+
+Version 0.0.3 implements an experimental adapter for the official service's
+registration, join, verification, session relay configuration and desktop input.
+It targets the requested **controlled-device role, one primary display**. It is
+not a feature-equivalent Pro port: Pro file operations, input drivers and using
+this compatibility mode to control another device are not implemented.
+
+The protocol signing and relay wrapping constants are public web-client protocol
+constants. They are not user/account/device credentials. Decrypted session relay
+authorization stays in memory. CI GUI checks block the official API hostname to
+avoid registering public test devices or uploading their credentials in screenshots.
+The adapter still requires real screen/input/restart testing before acceptance.
+
+Local verification for the actual adapter source, using a temporary test device:
+Windows-profile login returned 200; its authenticated MessagePack `/rtc` join
+received `joinResult`. TypeScript/Vite production build passed. Mock native-input
+tests cover normalized/relative coordinates, releasing held keys/buttons on
+disconnect, and rejecting malformed input and non-input operations.

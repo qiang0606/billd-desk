@@ -26,6 +26,7 @@ import { useIpcRendererSend } from '@/hooks/use-ipcRendererSend';
 import { useAppStore } from '@/store/app';
 import { usePiniaCacheStore } from '@/store/cache';
 import { ipcRenderer } from '@/utils';
+import { isOfficialService } from '@/utils/network/officialApi';
 
 const appStore = useAppStore();
 const cacheStore = usePiniaCacheStore();
@@ -46,12 +47,12 @@ onMounted(() => {
     windowId: WINDOW_ID_ENUM.remote,
     flag: cacheStore.isAlwaysOnTop,
   });
-  getClient();
+  if (!isOfficialService()) getClient();
   if (ipcRenderer) {
     if (NODE_ENV === 'development') {
       handleOpenDevTools({ windowId: WINDOW_ID_ENUM.remote });
     }
-    handleDeskVersionCheck();
+    if (!isOfficialService()) handleDeskVersionCheck();
   }
 });
 

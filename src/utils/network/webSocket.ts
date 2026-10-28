@@ -2,6 +2,8 @@ import { Socket, io } from 'socket.io-client';
 
 import { useNetworkStore } from '@/store/network';
 import { useUserStore } from '@/store/user';
+import { isOfficialService } from './officialApi';
+import { OfficialConnection } from './officialSocket';
 import {
   IReqWsFormat,
   WsConnectStatusEnum,
@@ -26,6 +28,7 @@ export function prettierSendWsMsg(data: {
 }
 
 export class WebSocketClass {
+  official?: OfficialConnection;
   socketIo: Socket | null = null;
   status: WsConnectStatusEnum = WsConnectStatusEnum.disconnect;
   url = '';
@@ -41,12 +44,16 @@ export class WebSocketClass {
     this.roomId = data.roomId;
     this.isAnchor = data.isAnchor;
     this.url = data.url;
-    this.socketIo = io(data.url, {
-      transports: ['websocket'],
-      // forceBase64: true,
-      // WARN 用了自定义parser之后，msrblob里面的blob文件错误
-      // parser: customParser,
-    });
+    if (isOfficialService(data.url)) {
+      this.official = new OfficialConnection(data.url, data.roomId);
+      this.socketIo = this.official.facade;
+    } else
+      this.socketIo = io(data.url, {
+        transports: ['websocket'],
+        // forceBase64: true,
+        // WARN 用了自定义parser之后，msrblob里面的blob文件错误
+        // parser: customParser,
+      });
     this.update();
   }
 
@@ -67,6 +74,10 @@ export class WebSocketClass {
         msgType,
         data
       );
+      return;
+    }
+    if (this.official) {
+      this.official.send(msgType, data || {}, requestId);
       return;
     }
     prettierSendWsMsg({ requestId, msgType, data });

@@ -17,6 +17,7 @@ import { IPC_EVENT } from '../src/event';
 import { WINDOW_ID_ENUM } from '../src/pure-constant';
 
 import type { nutjsTs } from './types';
+import { officialInput } from './official-input';
 import type { IIpcRendererData } from '../src/pure-interface';
 
 const nutjs: nutjsTs = require('@nut-tree-fork/nut-js');
@@ -169,6 +170,25 @@ function handleUrlQuery(obj: Record<string, string>) {
 }
 
 function main() {
+  let inputQueue = Promise.resolve();
+  ipcMain.handle(IPC_EVENT.officialRemoteInput, async (event, reqData) => {
+    const win = windowMap.get(mainWindowId);
+    if (!win || event.sender !== win.webContents) return { code: 1 };
+    const task = inputQueue.then(async () => {
+      const display = screen.getPrimaryDisplay();
+      await officialInput(nutjs, reqData?.data?.input, {
+        width: display.size.width * display.scaleFactor,
+        height: display.size.height * display.scaleFactor,
+      });
+    });
+    inputQueue = task.catch(() => {});
+    try {
+      await task;
+      return { code: 0 };
+    } catch {
+      return { code: 1 };
+    }
+  });
   const mainWindow = new BrowserWindow({
     width: windowNormalParams.width,
     height: windowNormalParams.height,

@@ -1,6 +1,11 @@
 name: Build open source Windows ARM64
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Optional prerelease tag for this verified build
+        required: false
+        default: ''
 permissions:
   contents: read
 jobs:
@@ -22,6 +27,8 @@ jobs:
         run: npm run build:win:arm64
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify desktop input validation and key release
+        run: node --test tests/official-input.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -36,3 +43,38 @@ jobs:
           name: BilldDesk-OpenSource-Windows-ARM64-experimental
           path: electron-release/arm64/*.exe
           if-no-files-found: error
+  publish:
+    if: inputs.release_tag != ''
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: BilldDesk-OpenSource-Windows-ARM64-experimental
+          path: package
+      - name: Publish compatibility test package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_REPO: ${{ github.repository }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-arm64\.[0-9]+$ ]]
+          sha256sum package/*.exe > package/SHA256SUMS.txt
+          cat > notes.md <<'EOF'
+          Experimental official-service compatibility host for Windows ARM64.
+
+          Native input load checks, packaged GUI smoke test with sandbox enabled,
+          and input validation tests passed on Windows 11 ARM64 CI.
+          Version 0.0.2's normal startup was also verified on the affected Windows
+          10 ARM64 machine. This newer protocol adapter still requires real-device
+          screen/input/reconnect validation; it is not a fully verified Pro port.
+
+          Uses the same official API/WSS hostname observed in the x86 client.
+          Compatibility mode currently targets being controlled, with one screen.
+          Pro file transfer, drivers and controlling other devices are unsupported.
+          No no-sandbox flag is enabled by default.
+          EOF
+          gh release create "$RELEASE_TAG" --repo "$RELEASE_REPO" --target "$GITHUB_SHA" --prerelease --title "Windows ARM64 official-service compatibility test" --notes-file notes.md package/*.exe package/SHA256SUMS.txt

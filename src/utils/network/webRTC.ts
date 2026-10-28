@@ -536,18 +536,23 @@ export class WebRTCClass {
       return;
     }
     if (!this.peerConnection) {
-      const iceServers = this.isSRS
-        ? []
-        : [
-            // {
-            //   urls: 'stun:stun.l.google.com:19302',
-            // },
-            {
-              urls: getCoturnUrl() || COTURN_URL,
-              username: 'hss',
-              credential: '123456',
-            },
-          ];
+      const officialPeer = useNetworkStore()
+        .wsMap.get(this.roomId)
+        ?.official?.peers.get(this.receiver);
+      const iceServers =
+        officialPeer?.iceServers ||
+        (this.isSRS
+          ? []
+          : [
+              // {
+              //   urls: 'stun:stun.l.google.com:19302',
+              // },
+              {
+                urls: getCoturnUrl() || COTURN_URL,
+                username: 'hss',
+                credential: '123456',
+              },
+            ]);
       this.peerConnection = new RTCPeerConnection({
         iceServers,
       });

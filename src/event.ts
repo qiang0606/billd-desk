@@ -1,4 +1,5 @@
 export const IPC_EVENT = {
+  officialRemoteInput: 'officialRemoteInput',
   commonTest: 'commonTest',
   powerSaveBlockerStart: 'powerSaveBlockerStart',
   closeAllWindow: 'closeAllWindow',
