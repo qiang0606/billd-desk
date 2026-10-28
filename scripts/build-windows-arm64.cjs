@@ -66,7 +66,12 @@ fs.copyFileSync(binary, path.join(release, 'libnut.node'));
 // A native load test must pass before generating the installer.
 require(path.join(release, 'libnut.node'));
 console.log('ARM64 native module load passed.');
-run(process.execPath, [path.join(path.dirname(require.resolve('vite/package.json')), 'bin/vite.js'), 'build']);
+run(process.execPath, [path.join(path.dirname(require.resolve('vite/package.json')), 'bin/vite.js'),
+  'build', '--base', './']);
+const html = fs.readFileSync(path.join(root, 'dist/index.html'), 'utf8');
+if (/\b(?:src|href)=["']\//.test(html)) {
+  throw new Error('Desktop HTML contains root-relative resource URLs.');
+}
 run(process.execPath, [path.join(path.dirname(require.resolve('electron-builder/package.json')), 'cli.js'),
   '--win', '--arm64', '--config', 'electron-builder.arm64.json5', '--publish', 'never']);
 const app = path.join(root, 'electron-release/arm64/win-arm64-unpacked/BilldDesk OpenSource ARM64.exe');
